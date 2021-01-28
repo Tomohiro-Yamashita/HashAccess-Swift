@@ -10,6 +10,9 @@ You can simulate the act of like the part of Swarm of Ethereum or IPFS on your l
 4. Then the file path will be shown.
 
 ## Usage - HashAccess
+
+Copy the HashAccess.swift in this project to yours
+
 ```
 // To register the files
 hashAccess.register(fileURLs:[URL]) { (result) -> (Void) in
