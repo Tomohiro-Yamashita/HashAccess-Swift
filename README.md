@@ -21,7 +21,7 @@ hashAccess.register(fileURLs:[URL]) { (result) -> (Void) in
   //String is the hash value
 }
 
-// To retrieve the file path with hash value
+// To retrieve all file paths for the hash value
 hashAccess.get(hashString:hashString) { (result) -> (Void) in
   //You get an array of [URL]
 }
