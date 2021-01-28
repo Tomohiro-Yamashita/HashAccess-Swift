@@ -23,3 +23,9 @@ hashAccess.get(hashString:hashString) { (result) -> (Void) in
   //You get an array of [URL]
 }
 ```
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+## Contact
+[E-mail](tomo_dev@sockettv.org), [twitter](https://twitter.com/DevYamashita), [Facebook](https://www.facebook.com/TomohiroYamashitaApps/)
