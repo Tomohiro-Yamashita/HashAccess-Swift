@@ -1,6 +1,7 @@
 # HashAccess-Swift
 Once you register the files, you can always find them with their hash values.
-You can simulate the act like the part of IPFS or Swarm of Ethereum on your local storage.
+
+You can simulate the act of like the part of IPFS or Swarm of Ethereum on your local storage.
 
 ## Usage - Test UI
 1. Drag and drop the file.
