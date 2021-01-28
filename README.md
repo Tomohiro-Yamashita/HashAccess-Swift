@@ -1,2 +1,24 @@
 # HashAccess-Swift
 Once you register the files, you can always find them with their hash values.
+
+
+## Usage - Test UI
+1. Drag and drop the file.
+2. You get the hash value.
+3. Paste the hash and press enter 
+4. Then the file path will be shown.
+
+## Usage - HashAccess
+```
+// To register the files
+hashAccess.register(fileURLs:[URL]) { (result) -> (Void) in
+  //You get a dictionary of [URL:String]
+  //URL is the registered file
+  //String is the hash value
+}
+
+// To retrieve the file path with hash value
+hashAccess.get(hashString:hashString) { (result) -> (Void) in
+  //You get an array of [URL]
+}
+```
