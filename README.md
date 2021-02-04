@@ -24,7 +24,7 @@ Copy the HashAccess.swift in this project to yours
 
 ```
 // To register the files
-hashAccess.register(fileURLs:[URL]) { (result) -> (Void) in
+hashAccess.register(urls:[URL]) { (result) -> (Void) in
   //You get a dictionary of [URL:String]
   //URL is the registered file
   //String is the hash value
@@ -34,6 +34,18 @@ hashAccess.register(fileURLs:[URL]) { (result) -> (Void) in
 hashAccess.get(hashString:hashString) { (result) -> (Void) in
   //You get an array of [URL]
 }
+
+
+// To register the files
+hashAccess.register(name:name,url:url) { (result) -> (Void) in
+  //you get a string value of the hash
+}
+
+// To retrieve all file paths for the hash value
+hashAccess.get(name:name) { (result) -> (Void) in
+  //You get a URL
+}
+
 ```
 
 ## License
