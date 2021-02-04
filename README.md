@@ -4,10 +4,19 @@ Once you register the files, you can always find them with their hash values.
 You can simulate the act of like the part of Swarm of Ethereum or IPFS on your local storage.
 
 ## Usage - Test UI
+With Hash
 1. Drag and drop the file.
 2. You get the hash value.
 3. Paste the hash and press enter.
-4. Then the file path will be shown.
+4. The file path will be shown.
+
+With Name
+1. Choose "Name" from the popup.
+2. Enter the name in the textfield of the center.
+3. Drag and drop the file. Then the file is registered with the entered name.
+4. Enter the name for the search
+5. The file path will be shown.
+
 
 ## Usage - HashAccess
 
