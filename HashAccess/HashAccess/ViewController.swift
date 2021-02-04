@@ -46,8 +46,8 @@ class ViewController: NSViewController {
     func findWithHash(hash hashString:String) {
         print(hashString)
         hashAccess.get(hash:hashString) { (result) -> (Void) in
-            for path in result {
-                print(path)
+            for url in result {
+                print(url)
             }
             self.testUI.setURLResults(result)
         }

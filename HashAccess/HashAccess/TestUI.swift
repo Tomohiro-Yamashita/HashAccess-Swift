@@ -146,6 +146,11 @@ class TestUI: NSView,NSTextFieldDelegate {
         }
     }
     
+    func showTheFile(_ url:URL) {
+        NSWorkspace.shared.selectFile(url.path ,
+            inFileViewerRootedAtPath:"")
+    }
+    
     func dragged(urls:[URL]) {
         
         if controller == nil {
@@ -237,6 +242,9 @@ class TestUI: NSView,NSTextFieldDelegate {
         }
         resultView.stringValue = string
         //findHashField.stringValue = ""
+        if result.count == 1 {
+            showTheFile(result[0])
+        }
     }
     
     func setResult(string:String) {
