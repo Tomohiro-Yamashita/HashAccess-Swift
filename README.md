@@ -36,12 +36,12 @@ hashAccess.get(hashString:hashString) { (result) -> (Void) in
 }
 
 
-// To register the files
+// To register a file with a name
 hashAccess.register(name:name,url:url) { (result) -> (Void) in
   //you get a string value of the hash
 }
 
-// To retrieve all file paths for the hash value
+// To retrieve the file paths for the name
 hashAccess.get(name:name) { (result) -> (Void) in
   //You get a URL
 }
