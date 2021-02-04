@@ -41,7 +41,7 @@ hashAccess.register(name:name,url:url) { (result) -> (Void) in
   //you get a string value of the hash
 }
 
-// To retrieve the file paths for the name
+// To retrieve the file path for the name
 hashAccess.get(name:name) { (result) -> (Void) in
   //You get a URL
 }
