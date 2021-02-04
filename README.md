@@ -5,7 +5,7 @@ You can simulate the act of like the part of Swarm of Ethereum or IPFS on your l
 
 ## Usage - Test UI
 With Hash
-1. Drag and drop the file to the upper field.
+1. Drag and drop the file into the upper field.
 2. You get the hash value.
 3. Paste the hash and press enter.
 4. The file path will be shown.
