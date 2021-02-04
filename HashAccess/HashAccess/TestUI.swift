@@ -8,7 +8,8 @@
 import Foundation
 import AppKit
 
-class TestUI: NSView, NSTextFieldDelegate {
+
+class TestUI: NSView,NSTextFieldDelegate {
     
     var controller:ViewController? = nil
     let dropView:DropView
@@ -17,7 +18,7 @@ class TestUI: NSView, NSTextFieldDelegate {
     let copyResultButton = NSButton()
     let findHashField = NSTextField()
     let findHashButton = NSButton()
-    
+    let hashOrName = NSPopUpButton()
     
     override init(frame frameRect:NSRect) {
         let dropFrame = frameRect
@@ -34,10 +35,16 @@ class TestUI: NSView, NSTextFieldDelegate {
         addSubview(copyResultButton)
         addSubview(findHashField)
         addSubview(findHashButton)
+        addSubview(hashOrName)
         resultView.isEnabled = false
+        hashOrName.action = #selector(self.hashOrNameChanged)
+        findHashButton.title = "Find"
+        findHashButton.action = #selector(self.findAction)
 
         findHashField.delegate = self
-        findHashField.placeholderString = "Paste the hash here"
+        
+        
+        ["Hash", "Name"].forEach(hashOrName.addItem)
     }
     
     required init?(coder: NSCoder) {
@@ -49,6 +56,8 @@ class TestUI: NSView, NSTextFieldDelegate {
         self.controller = cont
         cont.view.postsFrameChangedNotifications = true
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateLayout), name: NSView.frameDidChangeNotification, object: cont.view)
+        loadDefault()
+        hashOrNameChanged()
         updateLayout()
     }
     
@@ -60,16 +69,38 @@ class TestUI: NSView, NSTextFieldDelegate {
             dropView.frame.origin.x = 15
             dropView.frame.origin.y = frame.size.height - dropView.frame.size.height - 15
             
-            resultView.frame.size.width = frame.size.width - 100
+            resultView.frame.size.width = frame.size.width - 15
             resultView.frame.size.height = frame.size.height * 0.7 - 36
             resultView.frame.origin.x = 15
             resultView.frame.origin.y = 15
             
-            findHashField.frame.size.width = frame.size.width - 100
+            hashOrName.frame.size.width = 80
+            hashOrName.frame.size.height = 36
+            hashOrName.frame.origin.x = 15
+            hashOrName.frame.origin.y = frame.size.height - dropView.frame.size.height - 18 - hashOrName.frame.size.height
+            
+            findHashField.frame.size.width = frame.size.width - hashOrName.frame.size.width - 100
             findHashField.frame.size.height = 36
-            findHashField.frame.origin.x = 15
-            findHashField.frame.origin.y = frame.size.height - dropView.frame.size.height - 18 - findHashField.frame.size.height
+            findHashField.frame.origin.x = 15 + hashOrName.frame.size.width
+            findHashField.frame.origin.y = hashOrName.frame.origin.y
+            
+            findHashButton.frame.size.width = 80
+            findHashButton.frame.size.height = 36
+            findHashButton.frame.origin.x = findHashField.frame.size.width + findHashField.frame.origin.x
+            findHashButton.frame.origin.y = hashOrName.frame.origin.y
         }
+    }
+    
+    func saveDefault() {
+        let defaults = UserDefaults.standard
+        defaults.set(hashOrName.indexOfSelectedItem, forKey:"hashOrName")
+        defaults.synchronize()
+    }
+    
+    func loadDefault() {
+        let defaults = UserDefaults.standard
+        defaults.synchronize()
+        hashOrName.selectItem(at:defaults.integer(forKey: "hashOrName"))
     }
     
     func chooseFolder() -> URL? {
@@ -90,14 +121,64 @@ class TestUI: NSView, NSTextFieldDelegate {
         return nil
     }
     
+    @objc func hashOrNameChanged() {
+        saveDefault()
+        if hashOrName.indexOfSelectedItem == 0 {
+            findHashField.placeholderString = "Paste hash for searching"
+        } else {
+            findHashField.placeholderString = "Name for registering file or searching"
+        }
+    }
+    
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if (commandSelector == #selector(NSResponder.insertNewline(_:))) {
-            startFindWithHash()
-            
+            findAction()
             return true
         }
         return false
     }
+    
+    @objc func findAction() {
+        if hashOrName.indexOfSelectedItem == 0 {
+            startFindWithHash()
+        } else {
+            startFindWithName()
+        }
+    }
+    
+    func dragged(urls:[URL]) {
+        
+        if controller == nil {
+            return
+        }
+        if hashOrName.indexOfSelectedItem == 0 {
+            controller!.registerFiles(urls:urls)
+        } else if urls.count == 1 {
+            let name = findHashField.stringValue
+            if name != "" {
+                let url = urls[0]
+                if controller!.hashAccess.exists(name:name) {
+                    let alert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = "\(name) already exists. Do you want to update with the new file?"
+                    alert.addButton(withTitle: "OK")
+                    alert.addButton(withTitle: "Cancel")
+                    alert.beginSheetModal(for: controller!.view.window!) { (result) -> (Void) in
+                        if result == .alertFirstButtonReturn {
+                            self.controller!.hashAccess.register(name:name,url:url) { (result) -> (Void) in
+                                if result != nil {
+                                    self.setResult(string: "\(name) is updated with \(url.lastPathComponent)")
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    controller!.registerFileWithName(url:url, name:name)
+                }
+            }
+        }
+    }
+    
     
     func startFindWithHash() {
         
@@ -113,7 +194,7 @@ class TestUI: NSView, NSTextFieldDelegate {
         } else if hashes.count > 1 {
             var urls = [URL]()
             for hash in hashes {
-                controller!.hashAccess.get(hashString:hash) { (result) -> (Void) in
+                controller!.hashAccess.get(hash:hash) { (result) -> (Void) in
                     if result.count > 0 {
                         urls += [result[0]]
                     }
@@ -121,8 +202,13 @@ class TestUI: NSView, NSTextFieldDelegate {
             }
             setURLResults(urls)
         }
-        
-        
+    }
+    
+    func startFindWithName() {
+        let name = findHashField.stringValue
+        if name != "" {
+            controller!.findWithName(name:name)
+        }
     }
     
     func setHashResults(_ result:[URL:String]) {
@@ -136,7 +222,7 @@ class TestUI: NSView, NSTextFieldDelegate {
             resultView.isEnabled = true
         }
         resultView.stringValue = hashes
-        findHashField.stringValue = ""
+        //findHashField.stringValue = ""
         
     }
     
@@ -150,9 +236,13 @@ class TestUI: NSView, NSTextFieldDelegate {
             resultView.isEnabled = true
         }
         resultView.stringValue = string
-        findHashField.stringValue = ""
+        //findHashField.stringValue = ""
     }
     
+    func setResult(string:String) {
+        resultView.stringValue = string
+        resultView.isEnabled = true
+    }
 }
 
 
@@ -187,7 +277,7 @@ class DropView: NSView {
                 NSAttributedString.Key.paragraphStyle: NSMutableParagraphStyle.default.mutableCopy(),
             ]
             
-            String("Drag and drop the file here").draw(in: NSOffsetRect(dirtyRect, 0, 1), withAttributes: textFontAttributes)
+            String("Drag and drop the file to register").draw(in: NSOffsetRect(dirtyRect, 0, 1), withAttributes: textFontAttributes)
         }
     }
     override init(frame frameRect:NSRect) {
@@ -228,8 +318,8 @@ class DropView: NSView {
         
         if let urls = pasteBoard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL],
            urls.count > 0 {
-            if let view = baseView, let contr = view.controller {
-                contr.registerFiles(urls: urls)
+            if let view = baseView {
+                view.dragged(urls: expandDirectoryContents(urls))
             }
             
             return true
@@ -237,6 +327,29 @@ class DropView: NSView {
         
         return false
     }
+    
+    func expandDirectoryContents(_ urls:[URL]) -> [URL] {
+        
+        return urls
+        
+        
+        /*
+        // The permissions will be lost
 
+        var result = [URL]()
+        for url in urls {
+            
+            url.startAccessingSecurityScopedResource()
+            
+            if let urlEnum = FileManager.default.enumerator(at: url.resolvingSymlinksInPath(), includingPropertiesForKeys: nil) {
+                for case let url as URL in urlEnum {
+                    result += [url]
+                }
+            }
+            url.stopAccessingSecurityScopedResource()
+        }
+        return result + urls
+        */
+    }
     
 }
