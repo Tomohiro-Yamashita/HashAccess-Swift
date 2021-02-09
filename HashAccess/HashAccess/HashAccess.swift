@@ -20,6 +20,9 @@ class HashAccess:NSObject {
         loadDefault()
     }
     
+    func hash(url:URL) -> String? {
+        return sha256(url:url)
+    }
     
     func hashDictionaryPath() -> URL {
         return defaultArchivePath(name:"HashDictionary")
@@ -74,7 +77,7 @@ class HashAccess:NSObject {
             return
         }
         
-        resultHash = sha256(url:fileURL)
+        resultHash = hash(url:fileURL)
 
         fileURL.stopAccessingSecurityScopedResource()
         if let dat = data, let hash = resultHash {
@@ -122,19 +125,24 @@ class HashAccess:NSObject {
         
         var resultFiles:[URL] = []
         
-        var resultDatas:[Data] = []
-        if let exists = hashDictionary[hash]  {
-            resultDatas = exists
+        var bookmarkDatas:[Data] = []
+        var validBookmarks:[Data] = []
+        
+        if let data = hashDictionary[hash]  {
+            bookmarkDatas = data
         }
-        for data in resultDatas {
+        for data in bookmarkDatas {
             do {
                 let url = try NSURL.init(resolvingBookmarkData: data, options:.withSecurityScope, relativeTo: nil, bookmarkDataIsStale: nil) as URL
                 
-                    resultFiles += [url]
+                resultFiles += [url]
+                validBookmarks += [data]
             } catch let error as NSError {
                 print(error.description)
             }
         }
+        hashDictionary[hash] = validBookmarks
+        saveDefault()
         completion(resultFiles)
     }
     
@@ -148,8 +156,9 @@ class HashAccess:NSObject {
         completion(resultURLs)
     }
     
-    
-    
+    func remove(hash:String) {
+        hashDictionary[hash] = nil
+    }
     
     func sha256(url:URL) -> String? {
         do {
@@ -268,6 +277,9 @@ class NameAccess:NSObject {
         return nil
     }
     
+    func remove(name:String) {
+        nameDictionary[name] = nil
+    }
 }
 
 func defaultArchivePath(name:String) -> URL {
